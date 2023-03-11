@@ -1,17 +1,17 @@
 import './css/styles.css';
 import API from './fetchCountries';
 import Notiflix from 'notiflix';
+import debounce from 'lodash.debounce';
 
-const _ = require('lodash');
 const input = document.querySelector('#search-box');
 const countryList = document.querySelector('.country-list');
 const countryInfo = document.querySelector('.country-info');
 const DEBOUNCE_DELAY = 300;
 
-const debounsedFetchCountries = _.debounce(() => {
+const debounsedFetchCountries = debounce(() => {
   const trimInput = input.value.trim();
   API.fetchCountries(trimInput)
-    .then(then2)
+    .then(render)
     .catch(error => {
       clearMarkup();
       if (trimInput) {
@@ -54,21 +54,19 @@ function renderList(data) {
     .join('');
   countryList.innerHTML = markupList;
 }
-function then2(data) {
+function render(data) {
+clearMarkup();
   if (data.length > 10) {
-    clearMarkup();
     Notiflix.Notify.info(
       'Too many matches found. Please enter a more specific name.'
     );
-  } else {
-    clearMarkup();
-    renderList(data);
-    if (data.length <= 1) {
-      clearMarkup();
-      renderInfo(data);
+  } else if (data.length === 1) {
+    renderInfo(data);
+  }
+    else {
+      renderList(data);
     }
   }
-}
 function clearMarkup() {
   countryInfo.innerHTML = '';
   countryList.innerHTML = '';
